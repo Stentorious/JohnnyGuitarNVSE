@@ -1,4 +1,5 @@
 #pragma once
+#include "utility.h"
 
 struct NavMeshInfo;
 class bhkRigidBody;
@@ -793,7 +794,10 @@ public:
 
 	static NiNode* __stdcall Create(const char* nodeName);
 	NiAVObject* GetBlock(const char* blockName);
-	NiNode* GetNode(const char* nodeName);
+	NiNode* GetNode(const char* nodeName) {
+			NiAVObject* found = GetBlock(nodeName);
+			return found ? found->GetNiNode() : NULL;
+	}
 
 	NiAVObject* GetAt(UInt32 index) {
 		return m_children.Get(index);

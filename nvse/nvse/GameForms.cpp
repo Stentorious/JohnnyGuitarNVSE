@@ -45,41 +45,6 @@ const char* TESForm::GetTheName() {
 	return fullName ? fullName->name.CStr() : "";
 }
 
-void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const {
-	CALL_MEMBER_FN(DataHandler::Get(), DoAddForm)(newForm);
-
-	if (persist) {
-		// Only some forms can be safely saved as SaveForm. ie TESPackage at the moment.
-		bool canSave = false;
-		TESPackage* package = DYNAMIC_CAST(newForm, TESForm, TESPackage);
-		if (package)
-			canSave = true;
-		// ... more ?
-
-		if (canSave)
-			CALL_MEMBER_FN(TESSaveLoadGame::Get(), AddCreatedForm)(newForm);
-	}
-}
-
-TESForm* TESForm::CloneForm(bool persist) const {
-	TESForm* result = CreateFormInstance(typeID);
-	if (result) {
-		result->CopyFrom(this);
-		// it looks like some fields are not copied, case in point: TESObjectCONT does not copy BoundObject information.
-		TESBoundObject* boundObject = DYNAMIC_CAST(result, TESForm, TESBoundObject);
-		if (boundObject) {
-			TESBoundObject* boundSource = DYNAMIC_CAST(this, TESForm, TESBoundObject);
-			if (boundSource) {
-				for (UInt8 i = 0; i < 6; i++)
-					boundObject->bounds[i] = boundSource->bounds[i];
-			}
-		}
-		DoAddForm(result, persist);
-	}
-
-	return result;
-}
-
 bool TESForm::IsCloned() const {
 	return GetModIndex() == 0xff;
 }
@@ -673,4 +638,8 @@ bool AlchemyItem::IsPoison() {
 
 TESForm* TESForm::GetFormByNumericID(UInt32 formID) {
 	return CdeclCall<TESForm*>(0x4839C0, formID);
+}
+
+UInt8 TESForm::GetOverridingModIdx() {
+	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
 }

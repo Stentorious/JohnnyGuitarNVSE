@@ -88,6 +88,24 @@ ScriptEventList* Script::CreateEventList(void) {
 #endif
 }
 
+void Script::SetVarByName(ScriptEventList* eventList, const char* varName, float value)
+{
+	ListNode<VariableInfo>* traverse = varList.Head();
+	VariableInfo* varInfo;
+	do {
+		varInfo = traverse->data;
+		if (varInfo) {
+			if (!strcmp(((char*)varInfo->name.CStr()), varName)) {
+				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
+				if (scv) {
+					scv->data = value;
+					break;
+				}
+			}
+		}
+	} while (traverse = traverse->next);
+}
+
 Script::RefVariable* ScriptBuffer::ResolveRef(const char* refName) {
 	// ###TODO: Handle player, ref vars, quests, globals
 	return NULL;

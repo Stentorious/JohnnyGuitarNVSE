@@ -348,6 +348,46 @@ __declspec(naked) void __fastcall MemZero(void* dest, UInt32 bsize) {
 	}
 }
 
+float tan_p(float angle) {
+	angle *= kDbl4dPI;
+	double ang2 = angle * angle;
+	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
+}
+
+float dTan(float angle) {
+	{
+		while (angle > kDblPIx2)
+			angle -= kDblPIx2;
+
+		int octant = int(angle * kDbl4dPI);
+		switch (octant) {
+		case 0:
+			return tan_p(angle);
+		case 1:
+			return 1.0 / tan_p(kDblPId2 - angle);
+		case 2:
+			return -1.0 / tan_p(angle - kDblPId2);
+		case 3:
+			return -tan_p(kDblPI - angle);
+		case 4:
+			return tan_p(angle - kDblPI);
+		case 5:
+			return 1.0 / tan_p(kDblPIx3d2 - angle);
+		case 6:
+			return -1.0 / tan_p(angle - kDblPIx3d2);
+		default:
+			return -tan_p(kDblPIx2 - angle);
+		}
+	}
+}
+
+float fastDTan(float value) {
+	bool sign = (value < 0);
+	if (sign) value = -value;
+	float tempRes = dTan(value * kDblPId180);
+	return (sign ? -tempRes : tempRes);
+}
+
 void* (__cdecl* _memcpy)(void* destination, const void* source, size_t num) = memcpy;
 
 __declspec(naked) char* __fastcall StrCopy(char* dest, const char* src) {

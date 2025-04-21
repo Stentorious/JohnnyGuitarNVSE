@@ -19,7 +19,7 @@ static const UInt32 kScript_SetTextFnAddr = 0x005C27B0;
 #else
 #error
 #endif
-
+ 
 // 54 / 48
 class Script : public TESForm
 {
@@ -137,6 +137,7 @@ public:
 #error
 #endif
 	ScriptEventList	*CreateEventList();
+	void SetVarByName(ScriptEventList* eventList, const char* varName, float value);
 };
 
 STATIC_ASSERT(sizeof(Script) == SCRIPT_SIZE);

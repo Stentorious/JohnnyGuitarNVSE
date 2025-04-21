@@ -694,3 +694,10 @@ typedef bool (*_NVSEPlugin_Load)(const NVSEInterface* nvse);
  *	previous implementations.
  *
  ******************************************************************************/
+
+extern NVSEArrayVarInterface* g_arrInterface;
+extern NVSEStringVarInterface* g_strInterface;
+extern NVSEMessagingInterface* g_msgInterface;
+extern NVSEScriptInterface* g_scriptInterface;
+extern NVSECommandTableInterface* g_cmdTableInterface;
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);

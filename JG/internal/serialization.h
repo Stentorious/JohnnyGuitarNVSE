@@ -66,7 +66,7 @@ void LoadGameCallback(void*)
 		}
 	}
 
-	g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+	StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 }
 
 	void SerializationInit(const NVSEInterface* nvse)

@@ -277,14 +277,6 @@ public:
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);
 
-	MEMBER_FN_PREFIX(DataHandler);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(DoAddForm, UInt32, 0x004603B0, TESForm* pForm);	// stupid name is because AddForm is redefined in windows header files
-#elif EDITOR
-#else
-#error
-#endif
-
 	TESQuest* GetQuestByName(const char* questName);
 };
 

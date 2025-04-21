@@ -135,7 +135,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH];
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
-	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
+	if (strcmp("UwU.esp", DataHandler::Get()->GetNthModName(modIdx))) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder)) {
 		if (strstr(filename, "..\\")) return true;
 		char filepath[MAX_PATH];
@@ -187,20 +187,44 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH) {
+	FILE* f = fopen(filename, "rb");
+
+	if (f == NULL)
+		return false;
+	char info[54];
+	fread(info, sizeof(char), 54, f);
+	int width = *(int*)&info[18];
+	int height = *(int*)&info[22];
+	if (width < PixelW || height < PixelH) return false;
+	int XPadding = (width * 3 + 3) & (~3);
+	BYTE* data = new BYTE[XPadding];
+	PixelH = height - (PixelH + 1);
+	fseek(f, XPadding * PixelH, SEEK_CUR);
+	fread(data, sizeof(BYTE), XPadding, f);
+	UInt32 PosX = PixelW * 3;
+	B = data[PosX];
+	G = data[PosX + 1];
+	R = data[PosX + 2];
+	fclose(f);
+	delete[] data;
+	return true;
+}
+
 bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH];
-	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
+	char RED[VAR_NAME_SIZE], GREEN[VAR_NAME_SIZE], BLUE[VAR_NAME_SIZE];
 	UInt32 width = 0, height = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height)) {
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		UInt32 R = 0, G = 0, B = 0;
 		if (ReadBMP24(filename, R, G, B, width, height)) {
-			setVarByName(PASS_VARARGS, RED, R);
-			setVarByName(PASS_VARARGS, GREEN, G);
-			setVarByName(PASS_VARARGS, BLUE, B);
+			scriptObj->SetVarByName(eventList, RED, R);
+			scriptObj->SetVarByName(eventList, GREEN, G);
+			scriptObj->SetVarByName(eventList, BLUE, B);
 		}
 	}
 	return true;

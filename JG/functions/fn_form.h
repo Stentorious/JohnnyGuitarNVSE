@@ -374,7 +374,7 @@ bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
 	NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
-		auto it = g_dataHandler->recipeList.Head();
+		auto it = DataHandler::Get()->recipeList.Head();
 		do {
 			if (it->data && !it->data->outputs.Empty()) {
 				TESRecipe::ComponentList* outputs = &it->data->outputs;
@@ -1096,7 +1096,7 @@ bool IsApplicable(BGSPerk* perk) {
 bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* perkArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	ListNode<BGSPerk>* perkIter = g_dataHandler->perkList.Head();
+	ListNode<BGSPerk>* perkIter = DataHandler::Get()->perkList.Head();
 	BGSPerk* perk;
 	int perkRank;
 	do {
@@ -1543,7 +1543,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank);
 	if (faction) {
-		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next) {
+		for (TESBoundObject* object = DataHandler::Get()->boundObjectList->first; object; object = object->next) {
 			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
 			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
 				ListNode<FactionListData>* fctIter = actorBase->baseData.factionList.Head();
@@ -1869,7 +1869,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			*result = 1;
 		}
 		else {
-			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
+			auto gameTimeGlobals = GameTimeGlobals::GetSingleton();
+			float daysPassed = gameTimeGlobals->daysPassed == 0 ? 1.0 : gameTimeGlobals->daysPassed->data;
 			gameHoursPassed = floor(daysPassed * 24.0);
 			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
 		}

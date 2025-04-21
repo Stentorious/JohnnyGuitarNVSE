@@ -283,7 +283,7 @@ public:
 	UInt8						byte184;			// 184
 	UInt8						pad185[3];			// 185
 
-	__forceinline static BSAudioManager* Get() { return (BSAudioManager*)0x11F6EF0; }
+	__forceinline static BSAudioManager* GetSingleton() { return (BSAudioManager*)0x11F6EF0; }
 };
 STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
 

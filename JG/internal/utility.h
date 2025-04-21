@@ -115,6 +115,10 @@ double dAsin(double value);
 double dAcos(double value);
 double dAtan2(double y, double x);
 
+float tan_p(float angle);
+float dTan(float angle);
+float fastDTan(float value);
+
 UInt32 __fastcall GetNextPrime(UInt32 num);
 
 UInt32 __fastcall RGBHexToDec(UInt32 rgb);

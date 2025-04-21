@@ -1,9 +1,7 @@
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <tchar.h>
 #include <psapi.h>
 #include <mutex>
-#include <shared_mutex>
-#include <algorithm>
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
@@ -11,8 +9,6 @@
 #include "nvse/GameObjects.h"
 #include "nvse/GameEffects.h"
 #include "nvse/GameData.h"
-#include "nvse/GameExtraData.h"
-#include "nvse/GameTasks.h"
 #include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
 #include "nvse/GameUI.h"
@@ -22,7 +18,6 @@
 #include "nvse/FileFinder.h"
 #include "misc/WorldToScreen.h"
 #include "events/LambdaVariableContext.h"
-#include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
 #include "nvse/GameSettings.h"
@@ -42,11 +37,24 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+#include "internal/config.h"
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
+
+NVSEArrayVarInterface* g_arrInterface = nullptr;
+NVSEStringVarInterface* g_strInterface = nullptr;
+NVSEMessagingInterface* g_msgInterface = nullptr;
+NVSEScriptInterface* g_scriptInterface = nullptr;
+NVSECommandTableInterface* g_cmdTableInterface = nullptr;
+bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+
+#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
+#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
+
 #define JG_VERSION 517
+
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 	case NVSEMessagingInterface::kMessage_NewGame:
@@ -88,52 +96,44 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		break;
 
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
-			if (g_interfaceManager->currentMode == 1) {
-				float power = getHUDShakePower();
-				if (power > 0.0f) {
-					CdeclCall<void>(0x94C3A0, power);
+			{
+			auto interfaceManager = InterfaceManager::GetSingleton();
+				if (interfaceManager->currentMode == 1) {
+					float power = getHUDShakePower();
+					if (power > 0.0f) {
+						CdeclCall<void>(0x94C3A0, power);
+					}
 				}
-			}
-			ComputeDiscoveredRadioDirectory();
-			for (const auto& EventInfo : EventInfos) {
-				EventInfo->AddQueuedEvents();
-				EventInfo->DeleteEvents();
-			}
-			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
-			if (g_statsMenu && g_interfaceManager && g_interfaceManager->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
-				recalculateStatFilters = 0;
-				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+				ComputeDiscoveredRadioDirectory();
+				for (const auto& EventInfo : EventInfos) {
+					EventInfo->AddQueuedEvents();
+					EventInfo->DeleteEvents();
+				}
+				auto statsMenu = StatsMenu::Get();
+				if (statsMenu && interfaceManager && interfaceManager->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+					recalculateStatFilters = 0;
+					statsMenu->miscStatIDList.Filter(ShouldHideStat);
 
-			}
-			if (resetVanityCam) {
-				if (g_thePlayer) {
-					WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || g_thePlayer->byte64D; //64d = autovanity mode.
-					if (!bIsInVanityMode) {
-						ResetVanityWheel();
+				}
+				if (config::Get().resetVanityCam) {
+					if (g_thePlayer) {
+						WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || g_thePlayer->byte64D; //64d = autovanity mode.
+						if (!bIsInVanityMode) {
+							ResetVanityWheel();
+						}
 					}
 				}
 			}
-
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
 			g_thePlayer = PlayerCharacter::GetSingleton();
-			g_processManager = (ProcessManager*)0x11E0E80;
-			g_interfaceManager = InterfaceManager::GetSingleton();
-			g_bsWin32Audio = BSWin32Audio::GetSingleton();
-			g_dataHandler = DataHandler::Get();
-			g_audioManager = (BSAudioManager*)0x11F6EF0;
-			g_currentSky = (Sky**)0x11DEA20;
-			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
-			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
-			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoad: {
-			if (!bDisableDLLCompatibilityRoutines) {
+			if (!config::Get().bDisableDLLCompatibilityRoutines) {
 				HandleDLLInterop();
 			}
 		}
@@ -189,21 +189,7 @@ extern "C" {
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
 		strncpy(g_workingDir, filename, (strlen(filename)-13));
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
-		loadEditorIDs = 1;
-		fixHighNoon = 0;
-		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
-		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
-		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
-		iFPSCapLoadScreen = GetPrivateProfileInt("MAIN", "iFPSLimitLoadScreen", 0, filename);
-		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
-		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
-		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
-		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
-		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
-		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
-		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
-		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
-		//bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);
+		config::ReadIni(filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -533,11 +519,7 @@ extern "C" {
 		}
 		return true;
 	}
-	BOOL WINAPI DllMain(
-		HANDLE  hDllHandle,
-		DWORD   dwReason,
-		LPVOID  lpreserved
-	) {
+	BOOL WINAPI DllMain(HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved) {
 		switch (dwReason) {
 			case (DLL_PROCESS_ATTACH):
 				JohnnyHandle = (HMODULE)hDllHandle;

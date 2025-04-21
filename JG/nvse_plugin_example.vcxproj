@@ -130,6 +130,7 @@
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
+    <ClCompile Include="internal\config.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="..\nvse\nvse\GameOSDepend.h" />
     <ClInclude Include="..\nvse\nvse\GameProcess.h" />
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
+    <ClInclude Include="..\nvse\nvse\GameScript.h" />
     <ClInclude Include="..\nvse\nvse\GameSettings.h" />
     <ClInclude Include="..\nvse\nvse\GameSound.h" />
     <ClInclude Include="..\nvse\nvse\GameTasks.h" />
@@ -172,6 +174,7 @@
     <ClInclude Include="functions\fn_terminal.h" />
     <ClInclude Include="functions\fn_ui.h" />
     <ClInclude Include="functions\fn_utility.h" />
+    <ClInclude Include="internal\config.h" />
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\md5\md5.h" />
@@ -181,7 +184,6 @@
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />
     <ClInclude Include="misc\EditorIDs.h" />
-    <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />
   </ItemGroup>

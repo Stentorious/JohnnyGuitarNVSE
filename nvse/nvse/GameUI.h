@@ -27,7 +27,7 @@ public:
 	InterfaceManager();
 	~InterfaceManager();
 
-	static InterfaceManager* GetSingleton(void);
+	static InterfaceManager* GetSingleton(void) { return *(InterfaceManager**)(0x11D8A80); };
 	static bool					IsMenuVisible(UInt32 menuType);
 	static Menu* GetMenuByType(UInt32 menuType);
 	static Menu* TempMenuByType(UInt32 menuType);

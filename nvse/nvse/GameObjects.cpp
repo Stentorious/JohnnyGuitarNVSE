@@ -129,6 +129,13 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 	return NULL;
 }
 
+TESObjectCELL* TESObjectREFR::GetParentCell() {
+	if (this->parentCell) return parentCell;
+	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
+	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
+	return nullptr;
+}
+
 NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
 	NiNode* rootNode = GetNiNode();
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;

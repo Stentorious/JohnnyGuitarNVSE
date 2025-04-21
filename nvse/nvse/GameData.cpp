@@ -1,8 +1,7 @@
 #include "GameData.h"
 
 DataHandler* DataHandler::Get() {
-	DataHandler** g_dataHandler = (DataHandler**)0x011C3F2C;
-	return *g_dataHandler;
+	return *(DataHandler**)0x011C3F2C;
 }
 
 class LoadedModFinder {
@@ -63,11 +62,3 @@ struct IsModLoaded {
 UInt8 DataHandler::GetActiveModCount() const {
 	return modList.modInfoList.Count();
 }
-
-ModInfo::ModInfo() {
-	//
-};
-
-ModInfo::~ModInfo() {
-	//
-};

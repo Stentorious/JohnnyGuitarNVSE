@@ -91,6 +91,9 @@
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="internal\config.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -205,9 +208,6 @@
     <ClInclude Include="misc\EditorIDs.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="misc\misc.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="misc\WorldToScreen.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -234,6 +234,12 @@
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameProcess.h">
       <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameScript.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\config.h">
+      <Filter>internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

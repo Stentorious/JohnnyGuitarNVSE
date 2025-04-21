@@ -796,6 +796,7 @@ struct GameTimeGlobals
 	UInt32 initialized; // 30
 
 	float GetDaysPassed(int bgnYear = 2281, int bgnMonth = 9, int bgnDay = 13);
+	static GameTimeGlobals* GetSingleton() { return (GameTimeGlobals*)0x11DE7B8; };
 };
 
 // 10

@@ -116,7 +116,7 @@ struct ParamInfo {
 #define PASS_CMD_ARGS_EVAL	thisObj, arg1, arg2, result
 #define COMMAND_ARGS_EX		ParamInfo *paramInfo, void *scriptData, UInt32 *opcodeOffsetPtr, Script *scriptObj, ScriptEventList *eventList
 #define EXTRACT_ARGS_EX		paramInfo, scriptData, opcodeOffsetPtr, scriptObj, eventList
-
+#define VAR_NAME_SIZE		64
 //Macro to make CommandInfo definitions a bit less tedious
 
 #define DEFINE_CMD_FULL(name, altName, description, refRequired, numParams, paramInfo, parser) \

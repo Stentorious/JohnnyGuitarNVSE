@@ -239,6 +239,28 @@ bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2) {
+	__asm
+	{
+		movd xmm0, [ecx]
+			subss xmm0, [edx]
+				mulss xmm0, xmm0
+					movd xmm1, [ecx + 4]
+					subss xmm1, [edx + 4]
+					mulss xmm1, xmm1
+					movd xmm2, [ecx + 8]
+					subss xmm2, [edx + 8]
+					mulss xmm2, xmm2
+					addss xmm0, xmm1
+					addss xmm0, xmm2
+					sqrtss xmm0, xmm0
+					movd eax, xmm0
+					push eax
+					fld dword ptr[esp]
+					add esp, 4
+						ret
+	}
+}
 
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -292,20 +314,19 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 HandleType = 0;
-	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	char X_outS[VAR_NAME_SIZE], Y_outS[VAR_NAME_SIZE], Z_outS[VAR_NAME_SIZE];
 	TESObjectREFR* refr = NULL;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
 		if (refr) {
 			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
 		}
-		NiPoint3 NiPointBuffer = { 0,0,0 };
-		NiPointAssign(&NiPointBuffer, xIn, yIn, zIn);
+		NiPoint3 NiPointBuffer = { xIn, yIn, zIn};
 		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
 		*result = (WorldToScreen(&NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
-		setVarByName(PASS_VARARGS, X_outS, xOut);
-		setVarByName(PASS_VARARGS, Y_outS, yOut);
-		setVarByName(PASS_VARARGS, Z_outS, zOut);
+		scriptObj->SetVarByName(eventList, X_outS, xOut);
+		scriptObj->SetVarByName(eventList, Y_outS, yOut);
+		scriptObj->SetVarByName(eventList, Z_outS, zOut);
 	}
 	return true;
 }
@@ -334,20 +355,20 @@ bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 doGetLocal = 0;
-	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	char X_outS[VAR_NAME_SIZE], Y_outS[VAR_NAME_SIZE], Z_outS[VAR_NAME_SIZE];
 	TESObjectREFR* refr = NULL;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal)) {
 		if (auto m_GameCameraPos = JGGameCamera.CamPos) {
 			if (doGetLocal) {
-				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_localTranslate.x);
-				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_localTranslate.y);
-				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_localTranslate.z);
+				scriptObj->SetVarByName(eventList, X_outS, m_GameCameraPos->m_localTranslate.x);
+				scriptObj->SetVarByName(eventList, Y_outS, m_GameCameraPos->m_localTranslate.y);
+				scriptObj->SetVarByName(eventList, Z_outS, m_GameCameraPos->m_localTranslate.z);
 			}
 			else {
-				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_worldTranslate.x);
-				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_worldTranslate.y);
-				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_worldTranslate.z);
+				scriptObj->SetVarByName(eventList, X_outS, m_GameCameraPos->m_worldTranslate.x);
+				scriptObj->SetVarByName(eventList, Y_outS, m_GameCameraPos->m_worldTranslate.y);
+				scriptObj->SetVarByName(eventList, Z_outS, m_GameCameraPos->m_worldTranslate.z);
 			}
 		}
 	}

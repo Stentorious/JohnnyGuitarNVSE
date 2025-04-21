@@ -610,7 +610,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		}
 		if (ref->GetRefNiNode()) {
 			BSSoundHandle handle;
-			ThisCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
+			ThisCall<BSSoundHandle*>(0xAE5870, BSAudioManager::GetSingleton(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
 			NiPoint3* refPos = ref->GetPos();
 			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
 			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
@@ -731,12 +731,12 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	TESSound* sound = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
 		BSGameSound* gameSound;
-		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+		for (auto sndIter = BSAudioManager::GetSingleton()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			gameSound = sndIter.Get();
 			if (!gameSound || (gameSound->sourceSound != sound))
 				continue;
 			gameSound->Unk_0E();
-			ThisCall(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+			ThisCall(0xADA5D0, BSAudioManager::GetSingleton(), gameSound->mapKey, gameSound);
 			*result = 1;
 		}
 	}
@@ -746,7 +746,7 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ListNode<BSTempEffect>* iter = g_processManager->tempEffects.Head();
+	ListNode<BSTempEffect>* iter = ProcessManager::GetSingleton()->tempEffects.Head();
 	MagicShaderHitEffect* effect;
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 
@@ -975,7 +975,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* actorCell = g_thePlayer->parentCell;
 	if (actorCell)
-		*result = ThisStdCall_B(0x9764A0, g_processManager, actorCell->IsInterior());
+		*result = ThisStdCall_B(0x9764A0, ProcessManager::GetSingleton(), actorCell->IsInterior());
 	return true;
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
@@ -1052,6 +1052,46 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+
+double GetVectorAngle2D(NiPoint3* pt) {
+	double angle;
+	if (pt->y == 0) {
+		if (pt->x <= 0) {
+			angle = kDblPIx3d2;
+		}
+		else {
+			angle = kDblPId2;
+		}
+	}
+	else {
+		double ratio = pt->x / pt->y;
+		angle = dAtan(ratio);
+		if (pt->y < 0.0) {
+			angle += kDblPI;
+		}
+	}
+
+	return angle;
+}
+
+double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offset) {
+	NiPoint3 diff;
+	diff.Init(actorPos);
+	diff.Subtract(playerPos);
+
+	double angle = GetVectorAngle2D(&diff) - offset;
+	if (angle > -kDblPI) {
+		if (angle > kDblPI) {
+			angle = kDblPIx2 - angle;
+		}
+	}
+	else {
+		angle += kDblPIx2;
+	}
+	return angle * 57.295779513;
+}
+
+
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
@@ -1124,7 +1164,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	UInt32 index, isVisible;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3) {
-		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
+		FOPipboyManager* pipboyManager = InterfaceManager::GetSingleton()->pipboyManager;
 		if (pipboyManager->byte028) {
 			if (isVisible) {
 				pipboyManager->pipboyLightGlow[index]->m_flags &= ~1;
@@ -1203,10 +1243,11 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 		if (soundForm->soundFile.path.m_dataLen) {
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			auto audioManager = BSAudioManager::GetSingleton();
+			for (auto sndIter = audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				gameSound = sndIter.Get();
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
-					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+					fadeNode = (BSFadeNode*)audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
 						if (fadeOutTime == -1) {
 							gameSound->stateFlags &= 0xFFFFFF0F;
@@ -1214,7 +1255,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 						}
 						else {
 							int time = fadeOutTime * 1000.0;
-							ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+							ThisCall(0xADC560, BSAudioManager::GetSingleton(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
 						}
 						*result = 1;
 						break;
@@ -1277,12 +1318,13 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
 	*result = 0;
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
-		if (g_interfaceManager) {
-			if (!g_interfaceManager->pipBoyMode) {
-				ThisCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
+		auto interfaceManager = InterfaceManager::GetSingleton();
+		if (interfaceManager) {
+			if (!interfaceManager->pipBoyMode) {
+				ThisCall(0x70F4E0, interfaceManager, 0, pipboyTab);
 			}
-			else if (g_interfaceManager->pipBoyMode == 3) {
-				ThisCall(0x70F690, g_interfaceManager, 0);
+			else if (interfaceManager->pipBoyMode == 3) {
+				ThisCall(0x70F690, interfaceManager, 0);
 			}
 			*result = 1;
 		}

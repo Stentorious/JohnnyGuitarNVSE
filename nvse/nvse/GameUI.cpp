@@ -14,10 +14,6 @@ const _TempMenuByType TempMenuByType = (_TempMenuByType)0x00707990;	// Called fr
 #error
 #endif
 
-InterfaceManager* InterfaceManager::GetSingleton(void) {
-	return *(InterfaceManager**)0x011D8A80;
-}
-
 bool InterfaceManager::IsMenuVisible(UInt32 menuType) {
 	if ((menuType >= kMenuType_Min) && (menuType <= kMenuType_Max))
 		return g_MenuVisibilityArray[menuType] != 0;

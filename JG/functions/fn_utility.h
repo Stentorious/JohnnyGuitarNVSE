@@ -382,7 +382,7 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	UInt32 arrID;
 	UInt32 isReverse = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
-	if (!loadEditorIDs) return true;
+	if (!config::Get().loadEditorIDs) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
@@ -427,21 +427,22 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	if (g_interfaceManager) *result = g_interfaceManager->pipBoyMode;
+	auto interfaceManager = InterfaceManager::GetSingleton();
+	if (interfaceManager) *result = interfaceManager->pipBoyMode;
 	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
 	return true;
 }
 
 bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
-	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	char X_outS[VAR_NAME_SIZE], Y_outS[VAR_NAME_SIZE], Z_outS[VAR_NAME_SIZE];
 	char nodeName[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
 		if (rigidBody) {
 			NiVector4 linVelocity = rigidBody->motion.linVelocity;
-			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
-			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
-			setVarByName(PASS_VARARGS, Z_outS, linVelocity.z);
+			scriptObj->SetVarByName(eventList, X_outS, linVelocity.x);
+			scriptObj->SetVarByName(eventList, Y_outS, linVelocity.y);
+			scriptObj->SetVarByName(eventList, Z_outS, linVelocity.z);
 		}
 	}
 	return true;
@@ -526,27 +527,28 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 	int patch = 0;
 	bool enabled = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch)) {
+		const auto& config = config::Get();
 		switch (patch) {
 			case 1:
-				enabled = loadEditorIDs;
+				enabled = config.loadEditorIDs;
 				break;
 			case 2:
-				enabled = fixHighNoon;
+				enabled = config.fixHighNoon;
 				break;
 			case 3:
-				enabled = fixFleeing;
+				enabled = config.fixFleeing;
 				break;
 			case 4:
-				enabled = fixItemStacks;
+				enabled = config.fixItemStacks;
 				break;
 			case 5:
-				enabled = fixNPCShootingAngle;
+				enabled = config.fixNPCShootingAngle;
 				break;
 			case 6:
-				enabled = noMuzzleFlashCooldown;
+				enabled = config.noMuzzleFlashCooldown;
 				break;
 			case 7:
-				enabled = resetVanityCam;
+				enabled = config.resetVanityCam;
 				break;
 			default:
 				break;

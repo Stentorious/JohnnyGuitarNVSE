@@ -964,4 +964,6 @@ struct ProcessManager {
 	tList<Actor>			highActors;			// 080
 	UInt32					unk088[54];			// 088
 
+	static ProcessManager* GetSingleton() { return (ProcessManager*)0x11E0E80; };
+
 };
