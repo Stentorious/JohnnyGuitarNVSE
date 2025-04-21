@@ -160,14 +160,6 @@ struct ModInfo		// referred to by game as TESFile
 
 	bool IsLoaded() const { return true; }
 
-#if !EDITOR
-	/*** used by TESForm::LoadForm() among others ***/
-	MEMBER_FN_PREFIX(ModInfo);
-	DEFINE_MEMBER_FN(GetNextChunk, UInt32, _ModInfo_GetNextChunk);	// returns chunk type
-	DEFINE_MEMBER_FN(GetChunkData, bool, _ModInfo_GetChunkData, UInt8* buf, UInt32 bufSize); // max size, not num to read
-	DEFINE_MEMBER_FN(Read32, void, _ModInfo_Read32, void* out);
-	DEFINE_MEMBER_FN(HasMoreSubrecords, bool, _ModInfo_HasMoreSubrecords);
-#endif
 };
 
 STATIC_ASSERT(sizeof(WIN32_FIND_DATA) == 0x140);

@@ -182,8 +182,6 @@ public:
 STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
 
 
-
-
 TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
 
 class BaseProcess;

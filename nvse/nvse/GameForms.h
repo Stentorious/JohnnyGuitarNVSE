@@ -601,13 +601,7 @@ public:
 
 	static TESForm* GetFormByNumericID(UInt32 formID);
 
-	MEMBER_FN_PREFIX(TESForm);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
-#elif EDITOR
-#else
-#error
-#endif
+	
 };
 STATIC_ASSERT(sizeof(TESForm) == 0x18);
 

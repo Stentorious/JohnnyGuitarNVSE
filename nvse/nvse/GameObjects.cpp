@@ -1,5 +1,4 @@
 #include "GameObjects.h"
-#include "GameRTTI.h"
 #include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
@@ -31,12 +30,9 @@ PlayerCharacter* PlayerCharacter::GetSingleton() {
 }
 
 NiNode* PlayerCharacter::GetNode(const bool abFirstPerson) const {
-	if (abFirstPerson)
-		return playerNode;
-	else if (renderState)
-		return renderState->rootNode;
-	else
-		return nullptr;
+	if (abFirstPerson) return playerNode;
+	if (renderState) return renderState->rootNode;
+	return nullptr;
 }
 
 __declspec(naked) TESContainer* TESObjectREFR::GetContainer() {

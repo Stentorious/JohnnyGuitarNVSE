@@ -118,7 +118,6 @@
     <ClCompile Include="..\nvse\nvse\GameExtraData.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
     <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
     <ClCompile Include="..\nvse\nvse\GameSettings.cpp" />
@@ -146,7 +145,6 @@
     <ClInclude Include="..\nvse\nvse\GameExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameObjects.h" />
-    <ClInclude Include="..\nvse\nvse\GameOSDepend.h" />
     <ClInclude Include="..\nvse\nvse\GameProcess.h" />
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
     <ClInclude Include="..\nvse\nvse\GameScript.h" />

@@ -341,47 +341,6 @@ public:
 };
 STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);
 
-// A plugin author requested the ability to use OBSE format specifiers to format strings with the args
-// coming from a source other than script.
-// So changed ExtractFormattedString to take an object derived from following class, containing the args
-// Probably doesn't belong in GameAPI.h but utilizes a bunch of stuff defined here and can't think of a better place for it
-class FormatStringArgs {
-public:
-	enum argType {
-		kArgType_Float,
-		kArgType_Form		// TESForm*
-	};
-
-	virtual bool Arg(argType asType, void* outResult) = 0;	// retrieve next arg
-	virtual bool SkipArgs(UInt32 numToSkip) = 0;			// skip specified # of args
-	virtual bool HasMoreArgs() = 0;
-	virtual std::string GetFormatString() = 0;						// return format string
-};
-
-// concrete class used for extracting script args
-class ScriptFormatStringArgs : public FormatStringArgs {
-public:
-	virtual bool Arg(argType asType, void* outResult);
-	virtual bool SkipArgs(UInt32 numToSkip);
-	virtual bool HasMoreArgs();
-	virtual std::string GetFormatString();
-
-	ScriptFormatStringArgs(UInt32 _numArgs, UInt8* _scriptData, Script* _scriptObj, ScriptEventList* _eventList);
-	UInt32 GetNumArgs();
-	UInt8* GetScriptData();
-
-private:
-	UInt32			numArgs;
-	UInt8* scriptData;
-	Script* scriptObj;
-	ScriptEventList* eventList;
-	std::string fmtString;
-};
-bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...);
-
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, UInt8* outModIndex = NULL, bool shortPath = false);
-bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
-
 class ChangesMap;
 class InteriorCellNewReferencesMap;
 class ExteriorCellNewReferencesMap;

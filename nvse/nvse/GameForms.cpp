@@ -459,26 +459,6 @@ const char* TESPackage::StringForProcedureCode(eProcedure proc) {
 	return "";
 }
 
-//const char* TESPackage::StringForProcedureCode(eProcedure proc, bool bRemovePrefix)
-//{
-//	static size_t prefixLen = strlen("PROCEDURE_");
-//
-//	const char* name = NULL;
-//	// special-case "AQUIRE" (sic) to fix typo in game executable
-//	if (proc == TESPackage::kProcedure_ACQUIRE) {
-//		name = "PROCEDURE_ACQUIRE";
-//	}
-//	else {
-//		name = (proc <= TESPackage::kProcedure_MAX) ? s_procNames[proc] : NULL;
-//	}
-//
-//	if (name && bRemovePrefix) {
-//		name += prefixLen;
-//	}
-//
-//	return name;
-//}
-
 const char* TESPackage::PackageTime::DayForCode(UInt8 dayCode) {
 	dayCode += 1;
 	if (dayCode >= sizeof(TESPackage_DayStrings))
@@ -601,24 +581,6 @@ void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFem
 			rank->name.Set(newName);
 	}
 }
-
-#if 0
-UInt32 EffectItemList::CountItems() const {
-	return list.Count();
-}
-
-EffectItem* EffectItemList::ItemAt(UInt32 whichItem) {
-	return list.GetNthItem(whichItem);
-}
-
-const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const {
-	EffectItem* effItem = list.GetNthItem(whichEffect);
-	if (effItem->setting)
-		return GetFullName(effItem->setting);
-	else
-		return "<no name>";
-}
-#endif
 
 BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton() {
 	return *g_defaultObjectManager;
