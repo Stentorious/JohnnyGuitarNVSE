@@ -123,8 +123,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 						}
 					}
 				}
+
+				break;
 			}
-			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
 			g_thePlayer = PlayerCharacter::GetSingleton();
@@ -136,6 +137,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			if (!config::Get().bDisableDLLCompatibilityRoutines) {
 				HandleDLLInterop();
 			}
+			break;
 		}
 		default:
 			break;

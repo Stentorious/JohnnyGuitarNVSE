@@ -1530,6 +1530,15 @@ bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef
 	return true;
 }
 
+void __fastcall SetCellImageSpaceHook(TESObjectCELL* cell, void* edx, TESImageSpace* imageSpace) {
+	ThisCall<void>(0x4D36C0, cell, imageSpace);
+	PlayerCharacter* player = PlayerCharacter::GetSingleton();
+	if (player->parentCell != nullptr && player->parentCell == cell) {
+		CdeclCall<void>(0xB4F430, imageSpace->traitValues);
+	}
+
+}
+
 
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
@@ -1616,6 +1625,8 @@ void HandleFixes() {
 	hk_DialogueTopicResponseManageHook::InitHooks();
 	hk_EmotionOverrideUndo< 0x0617D59>();
 	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
+
+	WriteRelCall(0x5B7812, (UInt32)SetCellImageSpaceHook);
 }
 
 void HandleIniOptions() {
