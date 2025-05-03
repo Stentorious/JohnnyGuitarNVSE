@@ -1531,7 +1531,7 @@ bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef
 }
 
 void __fastcall SetCellImageSpaceHook(TESObjectCELL* cell, void* edx, TESImageSpace* imageSpace) {
-	ThisCall<void>(0x4D36C0, cell, imageSpace);
+	ThisCall<void>(0x547750, cell, imageSpace);
 	PlayerCharacter* player = PlayerCharacter::GetSingleton();
 	if (player->parentCell != nullptr && player->parentCell == cell) {
 		CdeclCall<void>(0xB4F430, imageSpace->traitValues);
